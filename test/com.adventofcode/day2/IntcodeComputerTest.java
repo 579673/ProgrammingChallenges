@@ -1,7 +1,7 @@
 package com.adventofcode.day2;
 
 import com.adventofcode.day2.exceptions.InvalidOpcodeException;
-import com.adventofcode.day2.exceptions.InvalidParameterModeException;
+import com.adventofcode.day2.exceptions.InvalidModeException;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,7 +22,7 @@ public class IntcodeComputerTest {
             assertArrayEquals(jumpFalseTestInputExpected, IntcodeComputer.parseIntcode(jumpFalseTestInput));
         } catch (InvalidOpcodeException e) {
             e.printStackTrace();
-        } catch (InvalidParameterModeException e) {
+        } catch (InvalidModeException e) {
             e.printStackTrace();
         }
     }
@@ -33,7 +33,7 @@ public class IntcodeComputerTest {
             assertArrayEquals(lessThanTestInputExpected, IntcodeComputer.parseIntcode(lessThanTestInput));
         } catch (InvalidOpcodeException e) {
             e.printStackTrace();
-        } catch (InvalidParameterModeException e) {
+        } catch (InvalidModeException e) {
             e.printStackTrace();
         }
     }
@@ -44,7 +44,7 @@ public class IntcodeComputerTest {
             assertArrayEquals(equalsTestInputExpected, IntcodeComputer.parseIntcode(equalsTestInput));
         } catch (InvalidOpcodeException e) {
             e.printStackTrace();
-        } catch (InvalidParameterModeException e) {
+        } catch (InvalidModeException e) {
             e.printStackTrace();
         }
     }

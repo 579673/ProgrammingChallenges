@@ -3,6 +3,7 @@ package com.adventofcode.day2;
 import com.adventofcode.day2.exceptions.InvalidOpcodeException;
 import com.adventofcode.day2.exceptions.InvalidModeException;
 
+import java.util.Queue;
 import java.util.Scanner;
 
 
@@ -20,10 +21,10 @@ public class IntcodeComputer {
     private final static int MODE_POSITION = 0;
     private final static int MODE_IMMEDIATE = 1;
 
-    private final static int OUTPUT_MODE_CONSOLE = 0;
-    private final static int OUTPUT_MODE_ARRAY = 1;
-    private final static int INPUT_MODE_CONSOLE = 0;
-    private final static int INPUT_MODE_ARRAY = 1;
+    public final static int OUTPUT_MODE_CONSOLE = 0;
+    public final static int OUTPUT_MODE_QUEUE = 1;
+    public final static int INPUT_MODE_CONSOLE = 0;
+    public final static int INPUT_MODE_QUEUE = 1;
 
     private static int[] parseInstruction(int instruction) {
         int[] result = new int[4];
@@ -53,17 +54,16 @@ public class IntcodeComputer {
      * @param inputProgram The intcode to be executed
      * @param inputMode 0 is console, 1 is array
      * @param outputMode 0 is console, 1 is array
-     * @param inputArray An array of inputs
-     * @param outputArray An array for outputs
+     * @param inputQueue An array of inputs
+     * @param outputQueue An array for outputs
      * @return Returns the altered intcode program
      * @throws InvalidModeException
      * @throws InvalidOpcodeException
      */
-    public static int[] parseIntcode(int[] inputProgram, int inputMode, int outputMode, int[] inputArray, int[] outputArray)
+    public static int[] parseIntcode(int[] inputProgram, int inputMode, int outputMode,
+                                     Queue<Integer> inputQueue, Queue<Integer> outputQueue)
                                                         throws InvalidModeException, InvalidOpcodeException {
         int instructionLength;
-        int inputCounter = 0;
-        int outputCounter = 0;
         int[] intcode = new int[inputProgram.length];
         System.arraycopy(inputProgram, 0, intcode, 0, intcode.length);
 
@@ -99,9 +99,8 @@ public class IntcodeComputer {
                     if (inputMode == INPUT_MODE_CONSOLE) {
                         System.out.print("Requesting integer input: ");
                         intcode[params[0]] = new Scanner(System.in).nextInt();
-                    } else if (inputMode == INPUT_MODE_ARRAY) {
-                        intcode[params[0]] = inputArray[inputCounter];
-                        inputCounter++;
+                    } else if (inputMode == INPUT_MODE_QUEUE) {
+                        intcode[params[0]] = inputQueue.poll();
                     } else {
                         throw new InvalidModeException("Invalid input mode: " + inputMode);
                     }
@@ -109,9 +108,8 @@ public class IntcodeComputer {
                 case OUT:
                     if (outputMode == OUTPUT_MODE_CONSOLE) {
                         System.out.println(intcode[params[0]]);
-                    } else if (outputMode == OUTPUT_MODE_ARRAY) {
-                        outputArray[outputCounter] = intcode[params[0]];
-                        outputCounter++;
+                    } else if (outputMode == OUTPUT_MODE_QUEUE) {
+                        outputQueue.add(intcode[params[0]]);
                     } else {
                         throw new InvalidModeException("Invalid output mode: " + outputMode);
                     }

@@ -1,39 +1,23 @@
 package com.adventofcode.day7;
 
 import com.adventofcode.day2.IntcodeComputer;
-import com.adventofcode.day2.exceptions.InvalidModeException;
-import com.adventofcode.day2.exceptions.InvalidOpcodeException;
-
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
-public class Amplifier implements Runnable {
+public class Amplifier extends Thread {
     private Amplifier nextAmp;
     private int inputSignal;
     private int outputSignal;
     private int phaseSetting;
     private int[] intcodeProgram;
-    private Queue<Integer> inputQueue;
-    private Queue<Integer> outputQueue;
+    private BlockingQueue<Integer> inputQueue;
+    private BlockingQueue<Integer> outputQueue;
 
-    public Amplifier(int[] intcodeProgram, int phaseSetting) {
-        this.intcodeProgram = intcodeProgram;
-        this.phaseSetting = phaseSetting;
-    }
+    public Amplifier(int[] intcodeProgram, int phaseSetting,
+                     BlockingQueue<Integer> inputQueue, BlockingQueue<Integer> outputQueue) {
 
-    public int amplify(Queue<Integer> inputQueue) throws InvalidOpcodeException, InvalidModeException {
-        this.inputQueue = inputQueue;
-        return amplify();
-    }
-
-    public int amplify() throws InvalidOpcodeException, InvalidModeException {
-        //System.out.println("Amplifier " + phaseSetting + " executing");
-        inputQueue = new LinkedList<>(List.of(phaseSetting, inputSignal));
-        outputQueue = new LinkedList<>();
-
-        intcodeProgram = IntcodeComputer.parseIntcode(
+        IntcodeComputer computer = new IntcodeComputer(
                 intcodeProgram,
                 IntcodeComputer.INPUT_MODE_QUEUE,
                 IntcodeComputer.OUTPUT_MODE_QUEUE,

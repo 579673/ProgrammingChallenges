@@ -16,7 +16,7 @@ public class DaySeven {
             9,101,1,9,9,4,9,3,9,101,1,9,9,4,9,3,9,1002,9,2,9,4,9,3,9,101,1,9,9,4,9,3,9,102,2,9,9,4,9,3,9,1001,9,1,9,4,9,
             3,9,1001,9,1,9,4,9,3,9,102,2,9,9,4,9,3,9,101,2,9,9,4,9,99};
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         int[][] phaseSettingOrders = generateAllPhaseSettingPermutations(0, 1, 2, 3, 4);
 
         int[] bestOrder = null;

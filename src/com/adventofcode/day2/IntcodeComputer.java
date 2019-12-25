@@ -5,9 +5,13 @@ import com.adventofcode.day2.exceptions.InvalidModeException;
 
 import java.util.Queue;
 import java.util.Scanner;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 
-public class IntcodeComputer {
+public class IntcodeComputer implements Runnable {
+
+    /* Constants */
     private final static int ADD = 1;
     private final static int MUL = 2;
     private final static int IN = 3;
@@ -26,12 +30,44 @@ public class IntcodeComputer {
     public final static int INPUT_MODE_CONSOLE = 0;
     public final static int INPUT_MODE_QUEUE = 1;
 
-    private static int[] parseInstruction(int instruction) {
+    /* Instance variables */
+    private int inputMode;
+    private int outputMode;
+    private BlockingQueue<Integer> inputQueue;
+    private BlockingQueue<Integer> outputQueue;
+    private int[] program;
+
+    public IntcodeComputer(int[] program) {
+        inputMode = INPUT_MODE_CONSOLE;
+        outputMode = OUTPUT_MODE_CONSOLE;
+        inputQueue = null;
+        outputQueue = null;
+        this.program = program;
+    }
+
+    public IntcodeComputer(int[] program, int inputMode, int outputMode,
+                           BlockingQueue<Integer> inputQueue, BlockingQueue<Integer> outputQueue) {
+        this.program = program;
+        this.inputMode = inputMode;
+        this.outputMode = outputMode;
+        this.inputQueue = inputQueue;
+        this.outputQueue = outputQueue;
+    }
+
+    public IntcodeComputer(int[] program, int inputMode, int outputMode) {
+        this.program = program;
+        this.inputMode = inputMode;
+        this.outputMode = outputMode;
+        this.inputQueue = new ArrayBlockingQueue<>(10, true);
+        this.outputQueue = new ArrayBlockingQueue<>(10, true);
+    }
+
+    private int[] parseInstruction(int instruction) {
         int[] result = new int[4];
         result[0] = instruction % 100;
         instruction /= 100;
         result[1] = instruction % 10;
-        instruction /= 10;
+        instruction /= 10;o
         result[2] = instruction % 10;
         instruction /= 10;
         result[3] = instruction % 10;
@@ -39,33 +75,12 @@ public class IntcodeComputer {
     }
 
     /**
-     * Default mode, reads from and prints to the console.
-     * @param inputProgram The intcode to be executed
-     * @return Returns the altered intcode program
-     * @throws InvalidModeException
-     * @throws InvalidOpcodeException
+     * Runs the computer
      */
-    public static int[] parseIntcode(int[] inputProgram) throws InvalidModeException, InvalidOpcodeException {
-        return parseIntcode(inputProgram, INPUT_MODE_CONSOLE, OUTPUT_MODE_CONSOLE, null, null);
-    }
-
-    /**
-     * Includes support for inputs and outputs by arrays
-     * @param inputProgram The intcode to be executed
-     * @param inputMode 0 is console, 1 is array
-     * @param outputMode 0 is console, 1 is array
-     * @param inputQueue An array of inputs
-     * @param outputQueue An array for outputs
-     * @return Returns the altered intcode program
-     * @throws InvalidModeException
-     * @throws InvalidOpcodeException
-     */
-    public static int[] parseIntcode(int[] inputProgram, int inputMode, int outputMode,
-                                     Queue<Integer> inputQueue, Queue<Integer> outputQueue)
-                                                        throws InvalidModeException, InvalidOpcodeException {
+    public void run() {
         int instructionLength;
-        int[] intcode = new int[inputProgram.length];
-        System.arraycopy(inputProgram, 0, intcode, 0, intcode.length);
+        int[] intcode = new int[program.length];
+        System.arraycopy(program, 0, intcode, 0, intcode.length);
 
         parsing:
         for (int i = 0; i < intcode.length; i += instructionLength) {
@@ -141,10 +156,9 @@ public class IntcodeComputer {
                             + " with instruction " + intcode[i]);
             }
         }
-        return intcode;
     }
 
-    private static int getInstructionLength(int opcode) {
+    private int getInstructionLength(int opcode) {
         if (opcode == IN || opcode == OUT) {
             return 2;
         } else if (opcode == JF || opcode == JT) {
@@ -155,12 +169,24 @@ public class IntcodeComputer {
         return 4;
     }
 
-    private static boolean invalidParamModes(int[] paramModes) {
+    private boolean invalidParamModes(int[] paramModes) {
         for (int paramMode : paramModes) {
             if (!(paramMode == MODE_POSITION || paramMode == MODE_IMMEDIATE)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public void setProgram(int[] program) {
+        this.program = program;
+    }
+
+    public BlockingQueue<Integer> getInputQueue() {
+        return inputQueue;
+    }
+
+    public BlockingQueue<Integer> getOutputQueue() {
+        return outputQueue;
     }
 }

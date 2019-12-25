@@ -1,6 +1,6 @@
 package com.adventofcode.day2.exceptions;
 
-public class InvalidOpcodeException extends Exception {
+public class InvalidOpcodeException extends RuntimeException {
     public InvalidOpcodeException() {
         super();
     }

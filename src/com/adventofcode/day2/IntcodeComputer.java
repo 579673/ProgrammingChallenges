@@ -67,7 +67,7 @@ public class IntcodeComputer implements Runnable {
         result[0] = instruction % 100;
         instruction /= 100;
         result[1] = instruction % 10;
-        instruction /= 10;o
+        instruction /= 10;
         result[2] = instruction % 10;
         instruction /= 10;
         result[3] = instruction % 10;

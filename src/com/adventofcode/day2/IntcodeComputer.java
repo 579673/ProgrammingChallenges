@@ -36,6 +36,7 @@ public class IntcodeComputer implements Runnable {
     private BlockingQueue<Integer> inputQueue;
     private BlockingQueue<Integer> outputQueue;
     private int[] program;
+    private int[] resultProgram;
 
     public IntcodeComputer(int[] program) {
         inputMode = INPUT_MODE_CONSOLE;
@@ -43,6 +44,7 @@ public class IntcodeComputer implements Runnable {
         inputQueue = null;
         outputQueue = null;
         this.program = program;
+        resultProgram = null;
     }
 
     public IntcodeComputer(int[] program, int inputMode, int outputMode,

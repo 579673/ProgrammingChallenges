@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 public class IntcodeComputerTest {
-    IntcodeComputer computer = new IntcodeComputer();
+    IntcodeComputer computer = new IntcodeComputer(null);
     int[] jumpFalseTestInput = {1106, 0, 4, 99, 1101, 2, 2, 0};
     int[] jumpFalseTestInputExpected = {4, 0, 4, 99, 1101, 2, 2, 0};
 
@@ -17,7 +17,8 @@ public class IntcodeComputerTest {
 
     @Test
     void jumpIfFalseTest() {
-            assertArrayEquals(jumpFalseTestInputExpected, computer.parseIntcode(jumpFalseTestInput));
+        computer.setProgram(jumpFalseTestInput);
+        assertArrayEquals(jumpFalseTestInputExpected, computer.run());
     }
 
     @Test

@@ -1,12 +1,17 @@
 package com.adventofcode.day2;
 
 import com.adventofcode.day2.exceptions.InvalidOpcodeException;
-import com.adventofcode.day2.exceptions.InvalidParameterModeException;
+import com.adventofcode.day2.exceptions.InvalidModeException;
 
+import java.util.Queue;
 import java.util.Scanner;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 
-public class IntcodeComputer {
+public class IntcodeComputer implements Runnable {
+
+    /* Constants */
     private final static int ADD = 1;
     private final static int MUL = 2;
     private final static int IN = 3;
@@ -20,7 +25,46 @@ public class IntcodeComputer {
     private final static int MODE_POSITION = 0;
     private final static int MODE_IMMEDIATE = 1;
 
-    private static int[] parseInstruction(int instruction) {
+    public final static int OUTPUT_MODE_CONSOLE = 0;
+    public final static int OUTPUT_MODE_QUEUE = 1;
+    public final static int INPUT_MODE_CONSOLE = 0;
+    public final static int INPUT_MODE_QUEUE = 1;
+
+    /* Instance variables */
+    private int inputMode;
+    private int outputMode;
+    private BlockingQueue<Integer> inputQueue;
+    private BlockingQueue<Integer> outputQueue;
+    private int[] program;
+    private int[] resultProgram;
+
+    public IntcodeComputer(int[] program) {
+        inputMode = INPUT_MODE_CONSOLE;
+        outputMode = OUTPUT_MODE_CONSOLE;
+        inputQueue = null;
+        outputQueue = null;
+        this.program = program;
+        resultProgram = null;
+    }
+
+    public IntcodeComputer(int[] program, int inputMode, int outputMode,
+                           BlockingQueue<Integer> inputQueue, BlockingQueue<Integer> outputQueue) {
+        this.program = program;
+        this.inputMode = inputMode;
+        this.outputMode = outputMode;
+        this.inputQueue = inputQueue;
+        this.outputQueue = outputQueue;
+    }
+
+    public IntcodeComputer(int[] program, int inputMode, int outputMode) {
+        this.program = program;
+        this.inputMode = inputMode;
+        this.outputMode = outputMode;
+        this.inputQueue = new ArrayBlockingQueue<>(10, true);
+        this.outputQueue = new ArrayBlockingQueue<>(10, true);
+    }
+
+    private int[] parseInstruction(int instruction) {
         int[] result = new int[4];
         result[0] = instruction % 100;
         instruction /= 100;
@@ -32,10 +76,13 @@ public class IntcodeComputer {
         return result;
     }
 
-    public static int[] parseIntcode(int[] input) throws InvalidParameterModeException, InvalidOpcodeException {
+    /**
+     * Runs the computer
+     */
+    public void run() {
         int instructionLength;
-        int[] intcode = new int[input.length];
-        System.arraycopy(input, 0, intcode, 0, intcode.length);
+        int[] intcode = new int[program.length];
+        System.arraycopy(program, 0, intcode, 0, intcode.length);
 
         parsing:
         for (int i = 0; i < intcode.length; i += instructionLength) {
@@ -43,7 +90,7 @@ public class IntcodeComputer {
 
             final int[] paramModes = { instruction[1], instruction[2], instruction[3] };
             if (invalidParamModes(paramModes)) {
-                throw new InvalidParameterModeException("Invalid parameter mode at index " + i
+                throw new InvalidModeException("Invalid parameter mode at index " + i
                         + " with instruction " + intcode[i]);
             }
 
@@ -66,11 +113,23 @@ public class IntcodeComputer {
                     intcode[params[2]] = intcode[params[0]] * intcode[params[1]];
                     break;
                 case IN:
-                    System.out.print("Requesting integer input: ");
-                    intcode[params[0]] = new Scanner(System.in).nextInt();
+                    if (inputMode == INPUT_MODE_CONSOLE) {
+                        System.out.print("Requesting integer input: ");
+                        intcode[params[0]] = new Scanner(System.in).nextInt();
+                    } else if (inputMode == INPUT_MODE_QUEUE) {
+                        intcode[params[0]] = inputQueue.poll();
+                    } else {
+                        throw new InvalidModeException("Invalid input mode: " + inputMode);
+                    }
                     break;
                 case OUT:
-                    System.out.println(intcode[params[0]]);
+                    if (outputMode == OUTPUT_MODE_CONSOLE) {
+                        System.out.println(intcode[params[0]]);
+                    } else if (outputMode == OUTPUT_MODE_QUEUE) {
+                        outputQueue.add(intcode[params[0]]);
+                    } else {
+                        throw new InvalidModeException("Invalid output mode: " + outputMode);
+                    }
                     break;
                 case JT:
                     if (intcode[params[0]] != 0) {
@@ -99,10 +158,9 @@ public class IntcodeComputer {
                             + " with instruction " + intcode[i]);
             }
         }
-        return intcode;
     }
 
-    private static int getInstructionLength(int opcode) {
+    private int getInstructionLength(int opcode) {
         if (opcode == IN || opcode == OUT) {
             return 2;
         } else if (opcode == JF || opcode == JT) {
@@ -113,12 +171,24 @@ public class IntcodeComputer {
         return 4;
     }
 
-    private static boolean invalidParamModes(int[] paramModes) {
+    private boolean invalidParamModes(int[] paramModes) {
         for (int paramMode : paramModes) {
             if (!(paramMode == MODE_POSITION || paramMode == MODE_IMMEDIATE)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public void setProgram(int[] program) {
+        this.program = program;
+    }
+
+    public BlockingQueue<Integer> getInputQueue() {
+        return inputQueue;
+    }
+
+    public BlockingQueue<Integer> getOutputQueue() {
+        return outputQueue;
     }
 }

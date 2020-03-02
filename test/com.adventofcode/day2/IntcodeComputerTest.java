@@ -1,12 +1,11 @@
 package com.adventofcode.day2;
 
-import com.adventofcode.day2.exceptions.InvalidOpcodeException;
-import com.adventofcode.day2.exceptions.InvalidParameterModeException;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 
 public class IntcodeComputerTest {
+    IntcodeComputer computer = new IntcodeComputer(null);
     int[] jumpFalseTestInput = {1106, 0, 4, 99, 1101, 2, 2, 0};
     int[] jumpFalseTestInputExpected = {4, 0, 4, 99, 1101, 2, 2, 0};
 
@@ -18,34 +17,17 @@ public class IntcodeComputerTest {
 
     @Test
     void jumpIfFalseTest() {
-        try {
-            assertArrayEquals(jumpFalseTestInputExpected, IntcodeComputer.parseIntcode(jumpFalseTestInput));
-        } catch (InvalidOpcodeException e) {
-            e.printStackTrace();
-        } catch (InvalidParameterModeException e) {
-            e.printStackTrace();
-        }
+        computer.setProgram(jumpFalseTestInput);
+        assertArrayEquals(jumpFalseTestInputExpected, computer.run());
     }
 
     @Test
     void lessThanTest() {
-        try {
-            assertArrayEquals(lessThanTestInputExpected, IntcodeComputer.parseIntcode(lessThanTestInput));
-        } catch (InvalidOpcodeException e) {
-            e.printStackTrace();
-        } catch (InvalidParameterModeException e) {
-            e.printStackTrace();
-        }
+            assertArrayEquals(lessThanTestInputExpected, computer.parseIntcode(lessThanTestInput));
     }
 
     @Test
     void equalsTest() {
-        try {
-            assertArrayEquals(equalsTestInputExpected, IntcodeComputer.parseIntcode(equalsTestInput));
-        } catch (InvalidOpcodeException e) {
-            e.printStackTrace();
-        } catch (InvalidParameterModeException e) {
-            e.printStackTrace();
-        }
+            assertArrayEquals(equalsTestInputExpected, computer.parseIntcode(equalsTestInput));
     }
 }
